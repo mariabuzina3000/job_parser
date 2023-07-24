@@ -41,9 +41,42 @@ class HeadHunterAPI(AbstractAPI):
         while self.__param['page'] <= self.num_page:
             responce = self.get_requests()
             self.vacancies.extend(responce)
-            self.__param += 1
+            self.__param['page'] += 1
 
         return self.vacancies
+
+    def validate_vacancies(self):
+        """Валидация списка вакансий с фильтрацией вакансий не входящих в запрос"""
+
+        self.get_vacancies()
+        converted_vacancies = []
+        for vac in self.vacancies:
+            if self.vacancy in vac['name'].lower():
+                if vac.get('salary') is not None:
+                    salary = {'salary': True,
+                              'salary_from': vac['salary']['from'],
+                              'salary_to': vac['salary']['to'],
+                              'currency': vac['salary']['currency']
+                              }
+                else:
+                    salary = {'salary': False,
+                              'salary_from': None,
+                              'salary_to': None,
+                              'currency': None
+                              }
+                vacancy_params = {'id': vac['id'],
+                                  'title': vac['name'],
+                                  'employer': vac['employer']['name'],
+                                  'url': vac['alternate_url'],
+                                  'area': vac['area']['name'],
+                                  'experience': vac['experience']['name'],
+                                  'employment': vac['employment']['name'],
+                                  'portal': 'HeadHunter'
+                                  }
+                vacancy_params.update(salary)
+                converted_vacancies.append(vacancy_params)
+
+        return converted_vacancies
 
 
 class SuperJobAPI(AbstractAPI):
@@ -94,6 +127,35 @@ class SuperJobAPI(AbstractAPI):
             self.__param += 1
 
         return self.vacancies
+
+    def validate_vacancies(self):
+        """Валидация списка вакансий с фильтрацией вакансий не входящих в запрос"""
+
+        self.get_vacancies()
+        converted_vacancies = []
+        for vac in self.vacancies:
+            if self.vacancy in vac['profession'].lower():
+                if vac['payment_from'] == 0 and vac['payment_to'] == 0:
+                    salary = {'salary': False}
+                else:
+                    salary = {'salary': True}
+
+                vacancy_params = {'id': vac['id'],
+                                  'title': vac['profession'],
+                                  'employer': vac['firm_name'],
+                                  'url': vac['link'],
+                                  'area': vac['town']['title'],
+                                  'experience': vac['experience']['title'],
+                                  'employment': vac['type_of_work']['title'],
+                                  'salary_from': vac['payment_from'],
+                                  'salary_to': vac['payment_to'],
+                                  'currency': vac['currency'],
+                                  'portal': 'SuperJob'
+                                  }
+                vacancy_params.update(salary)
+                converted_vacancies.append(vacancy_params)
+
+        return converted_vacancies
 
 # hh = HeadHunterAPI('python')
 # hh.get_requests()

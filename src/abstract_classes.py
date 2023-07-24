@@ -15,17 +15,12 @@ class AbstractAPI(ABC):
         pass
 
 
-class AbstractVacancies(ABC):
-    """Абстрактный класс для обработки списка вакансий"""
+class AbstractJson(ABC):
 
-    def add_vac(self):
-        """Функция для добавления вакансий"""
+    @abstractmethod
+    def create_file(self):
         pass
 
-    def get_data(self):
-        """Функция для получения данных из файла по указанным критериям"""
-        pass
-
-    def del_info(self):
-        """Функция для удаления информации о вакансиях"""
+    @abstractmethod
+    def load_file(self):
         pass
